@@ -94,6 +94,11 @@ def process_file(
 
 def main() -> None:
     load_dotenv(ROOT / ".env")
+    p = argparse.ArgumentParser(description="Alertas a partir de ficheiro local (sem Graph)")
+    p.add_argument("ficheiro", type=Path, help="Caminho para .vtt ou .txt")
+    p.add_argument("--titulo", default="", help="Nome da reunião no cartão do Teams")
+    args = p.parse_args()
+
     webhook = os.environ.get("TEAMS_INCOMING_WEBHOOK_URL", "").strip()
     if not webhook:
         print(
@@ -101,11 +106,6 @@ def main() -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-
-    p = argparse.ArgumentParser(description="Alertas a partir de ficheiro local (sem Graph)")
-    p.add_argument("ficheiro", type=Path, help="Caminho para .vtt ou .txt")
-    p.add_argument("--titulo", default="", help="Nome da reunião no cartão do Teams")
-    args = p.parse_args()
 
     path = args.ficheiro.resolve()
     if not path.is_file():
