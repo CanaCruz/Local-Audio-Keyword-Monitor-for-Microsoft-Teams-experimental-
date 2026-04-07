@@ -1,0 +1,3 @@
+# Uma palavra ou frase por linha. Linhas que começam com # são ignoradas.
+chamada
+arthur

@@ -1,0 +1,15 @@
+# Opcional: monitor experimental por áudio (Stereo Mix / loopback).
+# No Windows, PyAudio às vezes exige wheel específico; tente:
+#   pip install SpeechRecognition
+#   pip install pipwin && pipwin install pyaudio
+# ou use um Python 64-bit com wheel em https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio
+
+requests>=2.31.0
+python-dotenv>=1.0.0
+SpeechRecognition>=3.10.0
+PyAudio>=0.2.14
+# Fallback no Windows quando Stereo Mix dá erro -9999 (WASAPI loopback)
+sounddevice>=0.5.0
+numpy>=1.24.0
+# LOOPBACK_MODE=wasapi — captura direta da saída (headset USB / Razer sem barra na Mixagem Realtek)
+PyAudioWPatch>=0.2.12

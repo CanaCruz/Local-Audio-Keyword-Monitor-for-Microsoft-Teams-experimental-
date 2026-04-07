@@ -1,0 +1,79 @@
+Alertas Teams a partir de transcrições (Microsoft Graph)
+=========================================================
+
+1) Instalar dependências (uma vez):
+   python -m pip install -r requirements.txt
+
+2) Copiar .env.example para .env e preencher:
+   - AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET (app no Entra ID)
+   - MEETING_ORGANIZER_USER_ID = Object ID (GUID) do organizador das reuniões
+   - TEAMS_INCOMING_WEBHOOK_URL = URL do Incoming Webhook do canal
+
+3) Permissões da aplicação (Entra ID > API permissions):
+   - Application: OnlineMeetingTranscript.Read.All
+   - Admin consent
+
+4) Política de acesso (PowerShell / Teams - obrigatório para app aceder a artefactos):
+   New-CsApplicationAccessPolicy -Identity "TranscriptAlertsPolicy" -AppIds "<CLIENT_ID>"
+   Grant-CsApplicationAccessPolicy -PolicyName "TranscriptAlertsPolicy" -Identity "<UPN_DO_ORGANIZADOR>"
+
+   Documentação: procurar "Allow applications to access online meetings on behalf of a user"
+
+5) Palavras-chave: editar o ficheiro keywords.txt (uma por linha).
+
+6) Executar:
+   python run_alerts.py
+   ou em ciclo a cada 5 minutos:
+   python run_alerts.py --loop 300
+
+7) Estado e logs (criados automaticamente em state/):
+   - delta_link.txt  -> posição da sincronização Graph
+   - dedup.sqlite    -> evita alertas duplicados
+   - alerts_log.csv  -> registo dos alertas
+
+Nota: as APIs de transcrição são "metered" (podem ter custo). É preciso iniciar
+a transcrição nas reuniões do Teams.
+
+
+--- Modo SEM admin Entra / SEM Graph (run_local.py) ---
+
+Se não tiveres consentimento de admin na Graph, usa ficheiros locais:
+
+1) No .env basta (para este modo): TEAMS_INCOMING_WEBHOOK_URL
+
+2) Obtém a transcrição manualmente (Teams: após a reunião, onde a org permitir
+   ver/copiar transcrição) e guarda como .vtt ou .txt.
+
+3) Corre:
+   python run_local.py caminho\\para\\ficheiro.vtt
+   python run_local.py caminho\\para\\ficheiro.txt --titulo "Nome da reunião"
+
+4) keywords.txt e state/ (dedup + log) funcionam igual ao run_alerts.py.
+
+
+--- Experimental: áudio Stereo Mix (sem Graph) ---
+
+Aviso legal/privacidade: ver cabeçalho de experimental_listen_loopback.py
+
+1) pip install -r requirements-experimental.txt
+2) .env: TEAMS_INCOMING_WEBHOOK_URL (e opcionalmente AUDIO_INPUT_DEVICE_INDEX)
+3) Listar microfones: set LIST_AUDIO_DEVICES=1 e python experimental_listen_loopback.py
+4) Ativar "Mixagem estéreo" no Windows se necessário; escolher o índice certo.
+5) python experimental_listen_loopback.py
+
+   Teste sem webhook: DRY_RUN=1 (só mostra no terminal se detectar keyword).
+   Use um terminal interativo — jobs em background podem não abrir o áudio.
+
+   Por defeito aparece uma linha [STT] por bloco reconhecido: mostra o texto e se
+   houve alerta, se a keyword estava no texto mas em cooldown, ou nenhuma keyword.
+   Variáveis úteis no .env: LOG_TRANSCRIPTS, KEYWORD_COOLDOWN_SEC, STT_LANGUAGE,
+   SILENCE_MSG_EVERY (menos mensagens quando pausas o som). Ver .env.example.
+
+   Headset USB (ex. Razer): se a Mixagem estéreo Realtek não mostra níveis, o som não
+   passa por esse chip. Instale PyAudioWPatch (requirements-experimental.txt) e no .env:
+   LOOPBACK_MODE=wasapi — o script usa a entrada WASAPI "[Loopback]" da saída predefinida
+   (ex. BlackShark Chat). LIST_AUDIO_DEVICES=1 lista esses índices se o pacote estiver instalado.
+
+   Se Stereo Mix der erro -9999: o script tenta modo USE_WASAPI (sounddevice).
+   O sounddevice estável (ex. 0.5.5) NÃO tem loopback na API — se falhar, use
+   AUDIO_INPUT_DEVICE_INDEX com a Mixagem estéreo e sem USE_WASAPI_LOOPBACK.
