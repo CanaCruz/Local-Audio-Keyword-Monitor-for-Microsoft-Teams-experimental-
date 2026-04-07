@@ -5,10 +5,10 @@ Você exporta ou guarda a transcrição como ficheiro (.vtt ou .txt) e corre est
 Só precisa de TEAMS_INCOMING_WEBHOOK_URL no .env (webhook do canal — costuma dar
 para criar sem ser admin global, se a política do Teams permitir).
 
-Exemplos:
-  python run_local.py transcricao.vtt
-  python run_local.py transcricao.vtt --titulo "Daily 06/04"
-  python run_local.py pasta\\*.vtt   (no PowerShell use Get-ChildItem e pipe, ver LEIAME)
+Exemplos (na raiz do repositório):
+  python src/run_local.py transcricao.vtt
+  python src/run_local.py transcricao.vtt --titulo "Daily 06/04"
+  python src/run_local.py pasta\\*.vtt   (no PowerShell use Get-ChildItem e pipe, ver docs/LEIAME.txt)
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ from run_alerts import (
     post_teams_webhook,
 )
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 
 
 def file_content_id(data: bytes) -> str:

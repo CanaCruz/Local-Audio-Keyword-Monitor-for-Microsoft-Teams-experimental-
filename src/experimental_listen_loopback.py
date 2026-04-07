@@ -22,12 +22,12 @@ Requisitos:
      OU definir AUDIO_INPUT_DEVICE_INDEX (vários: 32,30,29 — tenta por ordem).
   3) pip install -r requirements-experimental.txt
 
-Uso:
-  python experimental_listen_loopback.py
+Uso (na raiz do repositório):
+  python src/experimental_listen_loopback.py
 
 Teste sem enviar ao Teams (só imprime no terminal):
   set DRY_RUN=1
-  python experimental_listen_loopback.py
+  python src/experimental_listen_loopback.py
 
 Cada frase reconhecida (padrão): linha [STT] "…" → alerta / cooldown / nenhuma keyword.
   LOG_TRANSCRIPTS=0 desliga; STT_LANGUAGE=pt-BR ou en-US; KEYWORD_COOLDOWN_SEC=0 (padrão, sem cooldown; ex. 90 para espaçar alertas);
@@ -35,7 +35,7 @@ Cada frase reconhecida (padrão): linha [STT] "…" → alerta / cooldown / nenh
 
 Listar índices de microfone (não precisa de webhook):
   set LIST_AUDIO_DEVICES=1
-  python experimental_listen_loopback.py
+  python src/experimental_listen_loopback.py
 
 Rode num terminal normal (sessão com áudio). Jobs em background do PowerShell
 costumam falhar ao abrir o microfone.
@@ -72,7 +72,7 @@ except ImportError:
     print("Instale: pip install SpeechRecognition", file=sys.stderr)
     sys.exit(1)
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
 # Import pesado só depois da mensagem inicial (evita “tela preta” se falhar aqui).

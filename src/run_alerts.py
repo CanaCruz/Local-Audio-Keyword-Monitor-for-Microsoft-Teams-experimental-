@@ -9,9 +9,9 @@ Para permissões de aplicação em reuniões online, a Microsoft exige também u
 **application access policy** a associar ao utilizador cujo ID usas em MEETING_ORGANIZER_USER_ID.
 Ver: "Allow applications to access online meetings on behalf of a user"
 
-Uso:
-  python run_alerts.py              # uma execução (ex.: Agendador do Windows / cron)
-  python run_alerts.py --loop 300   # repete a cada 300 segundos
+Uso (na raiz do repositório):
+  python src/run_alerts.py              # uma execução (ex.: Agendador do Windows / cron)
+  python src/run_alerts.py --loop 300   # repete a cada 300 segundos
 """
 
 from __future__ import annotations
@@ -34,9 +34,9 @@ from urllib.parse import quote
 import requests
 from dotenv import load_dotenv
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 STATE_DIR = ROOT / "state"
-KEYWORDS_FILE = ROOT / "keywords.txt"
+KEYWORDS_FILE = ROOT / "config" / "keywords.txt"
 DELTA_STATE_FILE = STATE_DIR / "delta_link.txt"
 DB_FILE = STATE_DIR / "dedup.sqlite"
 LOG_CSV = STATE_DIR / "alerts_log.csv"

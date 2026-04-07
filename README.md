@@ -8,6 +8,7 @@ Monitor experimental que **escuta o áudio do sistema** (reuniões Teams, navega
 
 ## Índice
 
+- [Estrutura do projeto](#estrutura-do-projeto)
 - [O que este repositório faz](#o-que-este-repositório-faz)
 - [Três formas de usar](#três-formas-de-usar)
 - [Requisitos](#requisitos)
@@ -21,11 +22,34 @@ Monitor experimental que **escuta o áudio do sistema** (reuniões Teams, navega
 
 ---
 
+## Estrutura do projeto
+
+Execute os comandos **na raiz do repositório** (onde estão `README.md` e `.env`).
+
+```
+.
+├── README.md
+├── .env.example          # modelo — copie para .env (não vai para o Git)
+├── requirements.txt
+├── requirements-experimental.txt
+├── config/
+│   └── keywords.txt      # palavras-chave (uma por linha)
+├── docs/
+│   └── LEIAME.txt        # instruções extras (Graph, run_local, etc.)
+├── src/
+│   ├── experimental_listen_loopback.py
+│   ├── run_alerts.py
+│   └── run_local.py
+└── state/                # criado em runtime (dedup, logs) — está no .gitignore
+```
+
+---
+
 ## O que este repositório faz
 
 | Objetivo | Descrição |
 |----------|-----------|
-| **Detecção** | Comparar o texto reconhecido com palavras em `keywords.txt` (ex.: `chamada`, `arthur`). |
+| **Detecção** | Comparar o texto reconhecido com palavras em `config/keywords.txt` (ex.: `chamada`, `arthur`). |
 | **Entrada de áudio** | Captura do que **toca no PC** (loopback), não do microfone como substituto de transcrição oficial. |
 | **Saída** | Mensagem no canal do Teams (webhook) ou corpo JSON para um fluxo Power Automate que publica no Teams. |
 
@@ -35,7 +59,7 @@ Fluxo simplificado:
 flowchart LR
   A[Áudio do Windows] --> B[Loopback WASAPI ou Mixagem estéreo]
   B --> C[Blocos PCM + Google STT]
-  C --> D{Keyword em keywords.txt?}
+  C --> D{Keyword em config/keywords.txt?}
   D -->|Sim| E[Teams Webhook ou POST Power Automate]
   D -->|Não| F[Linha STT só no terminal]
 ```
@@ -46,11 +70,11 @@ flowchart LR
 
 | Script | Quando usar |
 |--------|-------------|
-| **`run_alerts.py`** | Você tem app no Azure, **consentimento de admin**, política do Teams — lê transcrições via **Graph API**. |
-| **`run_local.py`** | Você tem **arquivo** `.vtt` ou `.txt` exportado manualmente — analisa offline. |
-| **`experimental_listen_loopback.py`** | Você quer ouvir **ao vivo** o som do PC **sem Graph** — este README foca **neste** modo. |
+| **`src/run_alerts.py`** | Você tem app no Azure, **consentimento de admin**, política do Teams — lê transcrições via **Graph API**. |
+| **`src/run_local.py`** | Você tem **arquivo** `.vtt` ou `.txt` exportado manualmente — analisa offline. |
+| **`src/experimental_listen_loopback.py`** | Você quer ouvir **ao vivo** o som do PC **sem Graph** — este README foca **neste** modo. |
 
-Documentação extra sobre Graph e arquivos locais: ver [`LEIAME.txt`](LEIAME.txt).
+Documentação extra sobre Graph e arquivos locais: ver [`docs/LEIAME.txt`](docs/LEIAME.txt).
 
 ---
 
@@ -70,14 +94,14 @@ cd caminho\para\este\repositório
 python -m pip install -r requirements-experimental.txt
 copy .env.example .env
 # Edite o .env (veja a seção seguinte)
-python experimental_listen_loopback.py
+python src/experimental_listen_loopback.py
 ```
 
 **Listar dispositivos de entrada** (para índices da Mixagem ou `[Loopback]`):
 
 ```powershell
 $env:LIST_AUDIO_DEVICES = "1"
-python experimental_listen_loopback.py
+python src/experimental_listen_loopback.py
 ```
 
 ---
@@ -138,13 +162,13 @@ A **Mixagem estéreo** (Realtek) muitas vezes **não mostra níveis** quando o s
 
 ## Arquivos importantes
 
-| Arquivo | Função |
+| Caminho | Função |
 |---------|--------|
-| `experimental_listen_loopback.py` | Loop principal: áudio → STT → keywords → Teams/PA. |
-| `keywords.txt` | Uma palavra ou frase por linha (`#` = comentário). |
-| `run_alerts.py` / `run_local.py` | Modos Graph e arquivo local. |
+| `src/experimental_listen_loopback.py` | Loop principal: áudio → STT → keywords → Teams/PA. |
+| `config/keywords.txt` | Uma palavra ou frase por linha (`#` = comentário). |
+| `src/run_alerts.py` / `src/run_local.py` | Modos Graph e arquivo local. |
 | `requirements-experimental.txt` | Dependências do modo experimental. |
-| `LEIAME.txt` | Instruções em português (inclui Graph e `run_local`). |
+| `docs/LEIAME.txt` | Instruções em português (inclui Graph e `run_local`). |
 
 ---
 
@@ -155,7 +179,7 @@ A **Mixagem estéreo** (Realtek) muitas vezes **não mostra níveis** quando o s
 | **401** no Power Automate | URL incompleto: falta `sig=` (e muitas vezes `sp=`, `sv=`). Copie o URL **completo** depois de salvar o fluxo; veja [Notificações no Teams](#notificações-no-teams). |
 | **RMS ≈ 0** / silêncio | Som não vai para a saída que o loopback captura; volume; Chat vs Game no headset; `WASAPI_LOOPBACK_DEVICE_INDEX`. |
 | **PyAudio -9999** | Teste outros índices em `AUDIO_INPUT_DEVICE_INDEX` ou use só `wasapi`. |
-| **Palavras não detectadas** | Veja as linhas `[STT]` no terminal; ajuste `STT_LANGUAGE` ou as palavras em `keywords.txt`. |
+| **Palavras não detectadas** | Veja as linhas `[STT]` no terminal; ajuste `STT_LANGUAGE` ou as palavras em `config/keywords.txt`. |
 | **DRY_RUN ativo sem querer** | Variável de ambiente na sessão: `Remove-Item Env:DRY_RUN` no PowerShell. |
 
 ---

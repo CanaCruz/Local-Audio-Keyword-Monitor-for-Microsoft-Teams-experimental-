@@ -1,6 +1,8 @@
 Alertas Teams a partir de transcrições (Microsoft Graph)
 =========================================================
 
+(Na raiz do repositório: scripts em src/, palavras-chave em config/keywords.txt.)
+
 1) Instalar dependências (uma vez):
    python -m pip install -r requirements.txt
 
@@ -19,12 +21,12 @@ Alertas Teams a partir de transcrições (Microsoft Graph)
 
    Documentação: procurar "Allow applications to access online meetings on behalf of a user"
 
-5) Palavras-chave: editar o ficheiro keywords.txt (uma por linha).
+5) Palavras-chave: editar config/keywords.txt (uma por linha).
 
 6) Executar:
-   python run_alerts.py
+   python src/run_alerts.py
    ou em ciclo a cada 5 minutos:
-   python run_alerts.py --loop 300
+   python src/run_alerts.py --loop 300
 
 7) Estado e logs (criados automaticamente em state/):
    - delta_link.txt  -> posição da sincronização Graph
@@ -45,21 +47,21 @@ Se não tiveres consentimento de admin na Graph, usa ficheiros locais:
    ver/copiar transcrição) e guarda como .vtt ou .txt.
 
 3) Corre:
-   python run_local.py caminho\\para\\ficheiro.vtt
-   python run_local.py caminho\\para\\ficheiro.txt --titulo "Nome da reunião"
+   python src/run_local.py caminho\\para\\ficheiro.vtt
+   python src/run_local.py caminho\\para\\ficheiro.txt --titulo "Nome da reunião"
 
-4) keywords.txt e state/ (dedup + log) funcionam igual ao run_alerts.py.
+4) config/keywords.txt e state/ (dedup + log) funcionam igual ao run_alerts.py.
 
 
 --- Experimental: áudio Stereo Mix (sem Graph) ---
 
-Aviso legal/privacidade: ver cabeçalho de experimental_listen_loopback.py
+Aviso legal/privacidade: ver cabeçalho de src/experimental_listen_loopback.py
 
 1) pip install -r requirements-experimental.txt
 2) .env: TEAMS_INCOMING_WEBHOOK_URL (e opcionalmente AUDIO_INPUT_DEVICE_INDEX)
-3) Listar microfones: set LIST_AUDIO_DEVICES=1 e python experimental_listen_loopback.py
+3) Listar microfones: set LIST_AUDIO_DEVICES=1 e python src/experimental_listen_loopback.py
 4) Ativar "Mixagem estéreo" no Windows se necessário; escolher o índice certo.
-5) python experimental_listen_loopback.py
+5) python src/experimental_listen_loopback.py
 
    Teste sem webhook: DRY_RUN=1 (só mostra no terminal se detectar keyword).
    Use um terminal interativo — jobs em background podem não abrir o áudio.
